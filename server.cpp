@@ -42,7 +42,7 @@ int main( int argc, char *argv[]) {
         exit(1);
     }
     
-    //Populate the sockaddr_in structure
+    //Populate the sockaddr_in structure (this is rincon's code)
     bzero((char *)&serv_addr, sizeof(serv_addr));
     portno = atoi(argv[1]);
     serv_addr.sin_family = AF_INET;
