@@ -46,20 +46,22 @@ void *communicateWithServer (void *arg_void_ptr)
     int n;
 
     //create stream socket
+    //this code is provided by Dr.Rincon
     int sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0) {
-        fprintf(stderr, "ERROR: Could not create socket\n");
-        return NULL;
+        std::cerr << "ERROR opening socket\n";
+        exit(0);
     }
 
     //setup server address
+    //this code is provided by Dr.Rincon
     struct hostent *server = gethostbyname(arg_ptr->hostname);
     if (server == NULL) {
-        fprintf(stderr, "ERROR: No such host\n");
-        close(sockfd);
-        return NULL;
+        std::cerr << "ERROR, no such host\n";
+        exit(0);
     }
 
+    //this code is provided by Dr.Rincon
     struct sockaddr_in serv_addr;
     bzero((char *) &serv_addr, sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
@@ -67,10 +69,10 @@ void *communicateWithServer (void *arg_void_ptr)
     serv_addr.sin_port = htons(arg_ptr->port);
 
     //connect to server
+    //this code is provided by Dr.Rincon
     if (connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
-        fprintf(stderr, "ERROR: Connection failed\n");
-        close(sockfd);
-        return NULL;
+        fprintf(stderr, "ERROR connecting\n");
+        exit(1);
     }
 
     std::string request = std::to_string((int)arg_ptr->symbol) + " " + 
@@ -78,37 +80,40 @@ void *communicateWithServer (void *arg_void_ptr)
                           std::to_string(arg_ptr->skipCount) + " " +
                           *(arg_ptr->encodedMessage);
     
+    //this code is provided by Dr.Rincon
     int msgSize = request.size();
     //send size
     n = write(sockfd, &msgSize, sizeof(int));
     if (n < 0) {
-        close(sockfd);
-        return NULL;
+        std::cerr << "ERROR writing to socket" << std::endl;
+        exit(0);
     }
 
     //send string
+    //this code is provided by Dr.Rincon
     n = write(sockfd, request.c_str(), msgSize);
     if (n < 0) {
-        close(sockfd);
-        return NULL;
+        std::cerr << "ERROR writing to socket" << std::endl;
+        exit(0);
     }
 
     //read size
+    //this code is provided by Dr.Rincon
     int respSize = 0;
     n = read(sockfd, &respSize, sizeof(int));
     if (n <= 0) {
-        close(sockfd);
-        return NULL;
+        std::cerr << "ERROR reading from socket" << std::endl;
+        exit(0);
     }
 
     //read string
+    //this code is provided by Dr.Rincon
     char *tempBuffer = new char[respSize + 1];
     bzero(tempBuffer, respSize + 1);
     n = read(sockfd, tempBuffer, respSize);
     if (n <= 0) {
-        delete[] tempBuffer;
-        close(sockfd);
-        return NULL;
+        std::cerr << "ERROR reading from socket" << std::endl;
+        exit(0);
     }
 
     std::string responseStr = tempBuffer;
@@ -131,7 +136,8 @@ void *communicateWithServer (void *arg_void_ptr)
 
 int main(int argc, char *argv[]) 
 {
-    if (argc < 3) {
+    //this code is provided by Dr.Rincon
+    if (argc != 3) {
         std::cerr << "usage " << argv[0] << "hostname port\n";
         exit(1);
     }
